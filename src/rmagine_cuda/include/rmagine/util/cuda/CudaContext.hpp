@@ -72,6 +72,19 @@ public:
     CudaContext(CUcontext ctx);
     ~CudaContext();
 
+    /// Create a CudaContext using the device's primary context.
+    /// Shared with CUDA runtime API users (PyTorch, etc.).
+    /// The returned shared_ptr releases the primary context on destruction.
+    static CudaContextPtr createPrimary(int device_id = 0);
+
+    /// Create a CudaContext with a standalone driver context (cuCtxCreate).
+    /// The returned shared_ptr destroys the context on destruction.
+    static CudaContextPtr createStandalone(int device_id = 0);
+
+    /// Wrap an externally-owned CUcontext.
+    /// The returned shared_ptr does NOT destroy the context.
+    static CudaContextPtr fromExternal(CUcontext ctx);
+
     int getDeviceId() const;
     cudaDeviceProp getDeviceInfo() const;
     void use();
@@ -82,7 +95,7 @@ public:
 
     // Only 4 and 8 Bytes are supported yet
     void setSharedMemBankSize(unsigned int bytes);
-    
+
     unsigned int getSharedMemBankSize() const;
 
     void synchronize();
